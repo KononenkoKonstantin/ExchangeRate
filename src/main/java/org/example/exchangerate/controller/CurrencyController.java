@@ -2,7 +2,6 @@ package org.example.exchangerate.controller;
 
 import jakarta.validation.Valid;
 import java.time.LocalDate;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.example.exchangerate.dto.internal.CurrencyRateResponseDto;
 import org.example.exchangerate.service.CurrencyRateService;
@@ -31,8 +30,9 @@ public class CurrencyController {
 
         logger.debug("Received request to get currency data");
         CurrencyRateResponseDto responseDto;
+
         responseDto = currencyRateService.getCurrencyRatesByDate(
-                Objects.requireNonNullElseGet(LocalDate.parse(date), LocalDate::now));
+                date != null ? LocalDate.parse(date) : LocalDate.now());
 
         logger.debug("Returned currency data: {}", responseDto);
         return ResponseEntity.ok(responseDto);
