@@ -14,4 +14,7 @@ public interface CurrencyRateRepository extends JpaRepository<CurrencyRate, Long
     List<CurrencyRate> findAllByExchangeDate(LocalDate date);
 
     void deleteAllByExchangeDate(LocalDate date);
+
+    @EntityGraph(attributePaths = "currency")
+    List<CurrencyRate> findAllByCurrencyCodeIgnoreCase(String code);
 }
