@@ -14,6 +14,7 @@ import org.example.exchangerate.dto.external.CurrencyExternalDto;
 import org.example.exchangerate.exception.RemoteServiceNotAvailableException;
 import org.example.exchangerate.service.CurrencyExternalDataService;
 import org.example.exchangerate.util.DateUtils;
+import org.example.exchangerate.util.HttpRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,14 +25,16 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequiredArgsConstructor
 public class CurrencyExternalDataServiceImpl implements CurrencyExternalDataService {
     private static final Logger logger = LoggerFactory.getLogger(CurrencyExternalDataServiceImpl.class);
+    private static final String DATE_PARAM = "date";
     @Value("${api.url}")
-    String url;
+    private String url;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
 
     @Override
     public List<CurrencyExternalDto> loadDataFromExternalApiByDate(LocalDate date) {
-        HttpRequest request = buildRequest(url, date.toString());
+        String dateValue = DateUtils.formatDateToCompactString(date.toString());
+        HttpRequest request = HttpRequestUtil.buildRequest(url, DATE_PARAM, dateValue);
 
         try {
             logger.debug("Sending request to external API: {}", request.uri());
@@ -51,18 +54,5 @@ public class CurrencyExternalDataServiceImpl implements CurrencyExternalDataServ
         } catch (IOException | InterruptedException e) {
             throw new RemoteServiceNotAvailableException("Can't get data from remote service. Please try again later");
         }
-    }
-
-    protected HttpRequest buildRequest(String url, String date) {
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(url);
-
-        uriBuilder.queryParam("date", DateUtils.formatDateToCompactString(date));
-
-        URI uri = uriBuilder.build().toUri();
-
-        return HttpRequest.newBuilder()
-                .GET()
-                .uri(uri)
-                .build();
     }
 }
